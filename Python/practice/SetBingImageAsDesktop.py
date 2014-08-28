@@ -1,4 +1,4 @@
-'''
+﻿'''
 Created on Aug 27, 2014
 
 @author: hwind
@@ -13,6 +13,7 @@ import pythoncom
 from win32com.shell import shell, shellcon
 from datetime import date, datetime
 from pathlib import Path
+from lib2to3.fixer_util import String
 
 def GetCharsetFromResponse (response):
     contentType = response.getheader("content-type")
@@ -22,7 +23,7 @@ def GetCharsetFromResponse (response):
 
 
 def LogWarning (msg):
-    print("%s    %s", datetime.today().isoformat(), msg)
+    print("%s    %s" % (datetime.today().isoformat(), msg))
 
 def DownloadImage(url, dest):
     if os.path.exists(dest):
@@ -58,6 +59,8 @@ imageInfo = json.loads(content)
 for img in imageInfo["images"]:
     if img["startdate"] != date.today().strftime("%Y%m%d"):
         LogWarning("Didn't find today's image info")
+    elif img["wp"] == False:
+        LogWarning("Today's image is not for desktop")
     else:
         imgHighResolution = img["urlbase"]+"_1920x1200.jpg"
         imageUrl = urllib.parse.urljoin("http://www.bing.com", imgHighResolution)
@@ -67,5 +70,3 @@ for img in imageInfo["images"]:
         DownloadImage(imageUrl, dest)
         UpdateDesktopBackground(dest)
         break
-
-
