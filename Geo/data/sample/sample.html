@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<style>
+
+.states {
+  fill: none;
+  stroke: #fff;
+  stroke-linejoin: round;
+}
+
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/queue.v1.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script>
+
+var width = 900,
+    height = 600;
+
+
+var color = d3.scale.category20();
+
+
+var path = d3.geo.path().projection(d3.geo.mercator()
+        .center([60, 40])
+        .scale(600)
+        .translate([0, height/2]));
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+    
+var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([-10, 0])
+  .html(function(d) {
+    return "<strong>" + d.properties.NAME + "</strong>";
+  });
+
+  svg.call(tip);
+
+queue()
+    .defer(d3.json, "ChinaProvinces.json")
+    .defer(d3.json, "ChinaCities.json")
+    .defer(d3.csv, "footprint.csv")
+    .await(ready);
+
+function ready(error, ch, cities, footprint) {
+
+  svg.append("g")
+      .attr("class", "counties")
+    .selectAll("path")
+      .data(topojson.feature(ch,ch.objects.ChinaProvinces).features)
+    .enter()    
+      .append("path")
+      .attr("d", path)
+      .style("fill", function(d, i) {
+          if(d.properties.NAME !== null){
+            for(var k=0; k<footprint.length; k++){
+                if(d.properties.NAME.indexOf(footprint[k].Name) == 0){
+                    return color(i);
+                }
+            }
+          }
+          return null;
+      })
+      .on('mouseover', tip.show)
+      .on('mouseout', tip.hide);
+
+  
+  svg.append("g")
+    .attr("class", "cities")
+    .selectAll("path")
+    .data(topojson.feature(cities,cities.objects.ChinaCities).features)
+    .enter()
+    .append("path")
+    .attr("d", path);
+}
+
+</script>
+</body>
+</html>
