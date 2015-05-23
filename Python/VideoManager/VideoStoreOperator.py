@@ -43,7 +43,7 @@ class VideoStoreOperator:
 		query = ("INSERT INTO videos "
 			"(id, name, size, md5) "
 			"VALUES (%s, %s, %s, %s)")
-		data_video = (id, processor.name, int(processor.size), processor.getMD5())
+		data_video = (id, processor.name, int(processor.size), processor.md5)
 		cursor.execute(query, data_video)
 
 		for i in range(processor.chuncks):

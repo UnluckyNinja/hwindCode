@@ -53,8 +53,7 @@ def download_video(id, path=None):
 	f.close()
 	
 	processor = FileProcessor(path)
-	md5 = processor.getMD5()
-	if md5 == video_detils.video.md5:
+	if processor.md5 == video_detils.video.md5:
 		print ("download finished. checksum matched")
 	else:
 		print ("download finished, but checksum doesn't match. Download failed.")

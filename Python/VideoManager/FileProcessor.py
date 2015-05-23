@@ -19,23 +19,26 @@ class FileProcessor:
 		self.name = os.path.basename(file_path)
 		self.size = os.path.getsize(file_path)
 		FileProcessor.__CHUNCK_SIZE = Config.config["ChunckSizeMB"] * 1024 * 1024
+		self.__md5 = None
 
 		if self.size % FileProcessor.__CHUNCK_SIZE == 0:
 			self.chuncks = self.size // FileProcessor.__CHUNCK_SIZE
 		else:
 			self.chuncks = self.size // FileProcessor.__CHUNCK_SIZE + 1
 
-	
-	def getMD5(self):
-		md5 = hashlib.md5()
-		f = open(self.__file_path, "rb")
-		while True:
-			data = f.read(2**20)
-			if not data:
-				break
-			md5.update(data)
-		f.close()
-		return md5.hexdigest()
+	@property
+	def md5(self):
+		if self.__md5 == None:
+			md5 = hashlib.md5()
+			f = open(self.__file_path, "rb")
+			while True:
+				data = f.read(2**20)
+				if not data:
+					break
+				md5.update(data)
+			f.close()
+			self.__md5 = md5.hexdigest()
+		return self.__md5
 
 	def get_chunck(self, index):
 		if index < 0 or index >= self.chuncks:
