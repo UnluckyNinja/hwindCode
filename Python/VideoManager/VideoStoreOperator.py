@@ -5,7 +5,6 @@ import mysql.connector
 import random
 from FileProcessor import FileProcessor
 import Config
-#from Config import config
 
 class VideoStoreOperator:
 	"""docstring for VideoStoreOperator"""
@@ -33,8 +32,6 @@ class VideoStoreOperator:
 
 	def  create(self, file_path):
 		processor = FileProcessor(file_path)
-		print "md5"
-		print processor.getMD5()
 		id = uuid.uuid4().hex
 
 		storage_info = self.get_storage_info()
@@ -172,5 +169,3 @@ class Storage(object):
 		self.name = name
 		self.container = container
 		self.key = key
-		
-		

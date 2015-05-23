@@ -21,9 +21,9 @@ class FileProcessor:
 		FileProcessor.__CHUNCK_SIZE = Config.config["ChunckSizeMB"] * 1024 * 1024
 
 		if self.size % FileProcessor.__CHUNCK_SIZE == 0:
-			self.chuncks = self.size / FileProcessor.__CHUNCK_SIZE
+			self.chuncks = self.size // FileProcessor.__CHUNCK_SIZE
 		else:
-			self.chuncks = self.size / FileProcessor.__CHUNCK_SIZE + 1
+			self.chuncks = self.size // FileProcessor.__CHUNCK_SIZE + 1
 
 	
 	def getMD5(self):

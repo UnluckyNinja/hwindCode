@@ -32,9 +32,9 @@ def list_videos():
 	vs_operator = VideoStoreOperator()
 	videos = vs_operator.list()
 	count = len(videos)
-	print u"id\t\t\t\tname"
+	print ("id\t\t\t\tname")
 	for i in range(count):
-		print u"{0}\t\t\t\t{1}".format(videos[i].id, videos[i].name)
+		print ("{0}\t\t\t\t{1}".format(videos[i].id, videos[i].name))
 
 	return videos
 
@@ -55,9 +55,9 @@ def download_video(id, path=None):
 	processor = FileProcessor(path)
 	md5 = processor.getMD5()
 	if md5 == video_detils.video.md5:
-		print "download finished. checksum matched"
+		print ("download finished. checksum matched")
 	else:
-		print "download finished, but checksum doesn't match. Download failed."
+		print ("download finished, but checksum doesn't match. Download failed.")
 
 def delete_video(id):
 	vs_operator = VideoStoreOperator()
