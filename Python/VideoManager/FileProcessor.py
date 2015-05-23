@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os.path
+import hashlib
 import Config
 
 class FileProcessor:
@@ -17,7 +18,7 @@ class FileProcessor:
 		self.__file_path = file_path
 		self.name = os.path.basename(file_path)
 		self.size = os.path.getsize(file_path)
-		self.__CHUNCK_SIZE = Config.config["ChunckSizeMB"] * 1024 * 1024
+		FileProcessor.__CHUNCK_SIZE = Config.config["ChunckSizeMB"] * 1024 * 1024
 
 		if self.size % FileProcessor.__CHUNCK_SIZE == 0:
 			self.chuncks = self.size / FileProcessor.__CHUNCK_SIZE
@@ -26,7 +27,15 @@ class FileProcessor:
 
 	
 	def getMD5(self):
-		return "12345"
+		md5 = hashlib.md5()
+		f = open(self.__file_path, "rb")
+		while True:
+			data = f.read(2**20)
+			if not data:
+				break
+			md5.update(data)
+		f.close()
+		return md5.hexdigest()
 
 	def get_chunck(self, index):
 		if index < 0 or index >= self.chuncks:

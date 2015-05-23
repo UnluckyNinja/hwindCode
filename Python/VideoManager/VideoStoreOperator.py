@@ -33,6 +33,8 @@ class VideoStoreOperator:
 
 	def  create(self, file_path):
 		processor = FileProcessor(file_path)
+		print "md5"
+		print processor.getMD5()
 		id = uuid.uuid4().hex
 
 		storage_info = self.get_storage_info()
@@ -104,7 +106,18 @@ class VideoStoreOperator:
 
 
 	def delete(self, id):
-		pass
+		cnx = mysql.connector.connect(**self.__config)
+		cursor = cnx.cursor()
+		
+		query = ("DELETE FROM files WHERE videoId = %s")
+		cursor.execute(query, (id,))
+
+		query = ("DELETE FROM videos WHERE id = %s")
+		cursor.execute(query, (id,))
+
+		cnx.commit()
+		cursor.close()
+		cnx.close()
 
 class Video:
 	"""docstring for Video"""

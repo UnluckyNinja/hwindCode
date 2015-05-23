@@ -56,4 +56,6 @@ upload_chunck(buf, chk.path, chk.storagename, chk.container, chk.key)
 """
 #upload_video(path)
 videos = list_videos()
+print videos[0].size
+print videos[0].md5
 #download_video(videos[0].id, "./helloworldtest")

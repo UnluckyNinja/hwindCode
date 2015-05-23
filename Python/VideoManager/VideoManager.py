@@ -27,7 +27,7 @@ def upload_video(file_path):
 		buf = processor.get_chunck(i)
 		chk = video_detils.chuncks[i]
 		upload_chunck(buf, chk.path, chk.storagename, chk.container, chk.key)
-
+		
 def list_videos():
 	vs_operator = VideoStoreOperator()
 	videos = vs_operator.list()
@@ -51,3 +51,33 @@ def download_video(id, path=None):
 		buf = download_chunck(chk.path, chk.storagename, chk.container, chk.key)
 		f.write(buf)
 	f.close()
+	
+	processor = FileProcessor(path)
+	md5 = processor.getMD5()
+	if md5 == video_detils.video.md5:
+		print "download finished. checksum matched"
+	else:
+		print "download finished, but checksum doesn't match. Download failed."
+
+def delete_video(id):
+	vs_operator = VideoStoreOperator()
+	video_detils = vs_operator.get(id)
+	vs_operator.delete(id)
+	
+	count = len(video_detils.chuncks)
+	for i in range(count):
+		chk = video_detils.chuncks[i]
+		blob_service = BlobService(account_name=chk.storagename, account_key=chk.key)
+		blob_service.delete_blob(chk.container, chk.path)
+
+def upload_cmd(options):
+	upload_video(options.src)
+
+def download_cmd(options):
+	download_video(options.id, options.dest)
+
+def list_cmd(options):
+	return list_videos()
+
+def delete_cmd(options):
+	delete_video(options.id)
