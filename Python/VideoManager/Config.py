@@ -10,5 +10,8 @@ def init_config():
 		fp = open("config.json", "r")
 		config = json.load(fp)
 		fp.close()
+
+def is_encrypt():
+	return config["pwd"] != None and config["pwd"] != ""
 	
 	

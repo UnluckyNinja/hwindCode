@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import shutil
 from azure.storage import BlobService
 from FileProcessor import FileProcessor
 from VideoStoreOperator import *
+import Config
+import Encrypt
 
 def upload_chunck(buf, path, storagename, container, key):
 	blob_service = BlobService(account_name=storagename, account_key=key)
@@ -43,7 +46,12 @@ def download_video(id, path=None):
 	video_detils = vs_operator.get(id)
 
 	if path == None:
-		path = video_detils.video.name
+		decrypt_path = video_detils.video.name
+		path = video_detils.video.name + ".tmp"
+	else:
+		decrypt_path = path
+		path = path + ".tmp"
+
 	f = open(path, "wb")
 	count = len(video_detils.chuncks)
 	for i in range(count):
@@ -51,8 +59,14 @@ def download_video(id, path=None):
 		buf = download_chunck(chk.path, chk.storagename, chk.container, chk.key)
 		f.write(buf)
 	f.close()
-	
-	processor = FileProcessor(path)
+
+	if Config.is_encrypt():
+		with open(path, "rb") as in_f, open(decrypt_path, "wb") as out_f:
+			Encrypt.decrypt(in_f, out_f, Config.config["pwd"])
+	else:
+		shutil.move(path, decrypt_path)
+
+	processor = FileProcessor(decrypt_path)
 	if processor.md5 == video_detils.video.md5:
 		print ("download finished. checksum matched")
 	else:

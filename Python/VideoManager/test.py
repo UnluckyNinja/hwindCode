@@ -4,12 +4,13 @@ from FileProcessor import FileProcessor
 from VideoStoreOperator import *
 from VideoManager import *
 import Config
+import Encrypt
 
 Config.init_config()
 
 
 
-path = u"D:\downloads\test.mkv"
+path = "D:\\test.mkv"
 """
 processor = FileProcessor(path)
 
@@ -55,7 +56,25 @@ buf = processor.get_chunck(0)
 upload_chunck(buf, chk.path, chk.storagename, chk.container, chk.key)
 """
 #upload_video(path)
-videos = list_videos()
-print videos[0].size
-print videos[0].md5
+#videos = list_videos()
+#print videos[0].size
+#print videos[0].md5
 #download_video(videos[0].id, "./helloworldtest")
+
+with open(path, "rb") as in_f, open(path+".tmp", "wb") as out_f:
+	Encrypt.encrypt(in_f, out_f, "Password01!")
+
+with open(path+".tmp", "rb") as in_f, open(path+".tmp2", "wb") as out_f:
+	Encrypt.decrypt(in_f, out_f, "Password01!")
+
+with open(path+".tmp", "rb") as in_f, open(path+".tmp3", "wb") as out_f:
+	Encrypt.decrypt(in_f, out_f, "Password02!")
+
+p1 = FileProcessor(path)
+p2 = FileProcessor(path+".tmp2")
+p3 = FileProcessor(path+".tmp3")
+
+print (p1.md5)
+print (p2.md5)
+print (p3.md5)
+

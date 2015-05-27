@@ -3,13 +3,13 @@
 import os.path
 import hashlib
 import Config
+import Encrypt
 
 class FileProcessor:
 	"""docstring for FileProcessor"""
 
 	name = None
 	size = 0
-	chuncks = 0
 	__file_path = None
 
 	__CHUNCK_SIZE = 0
@@ -20,11 +20,26 @@ class FileProcessor:
 		self.size = os.path.getsize(file_path)
 		FileProcessor.__CHUNCK_SIZE = Config.config["ChunckSizeMB"] * 1024 * 1024
 		self.__md5 = None
+		self.__chuncks = None
+	
+	@property
+	def chuncks(self):
+		if self.__chuncks == None:
+			cur_size = 0
+			if Config.is_encrypt():
+				tmp_path = self.__file_path + ".tmp"
+				with open(self.__file_path, "rb") as in_f, open(tmp_path, "wb") as out_f:
+					Encrypt.encrypt(in_f, out_f, Config.config["pwd"])
+				cur_size = os.path.getsize(tmp_path)
+			else:
+				cur_size = self.size
 
-		if self.size % FileProcessor.__CHUNCK_SIZE == 0:
-			self.chuncks = self.size // FileProcessor.__CHUNCK_SIZE
-		else:
-			self.chuncks = self.size // FileProcessor.__CHUNCK_SIZE + 1
+			if cur_size % FileProcessor.__CHUNCK_SIZE == 0:
+				self.__chuncks = cur_size // FileProcessor.__CHUNCK_SIZE
+			else:
+				self.__chuncks = cur_size // FileProcessor.__CHUNCK_SIZE + 1
+		
+		return self.__chuncks
 
 	@property
 	def md5(self):
@@ -41,12 +56,16 @@ class FileProcessor:
 		return self.__md5
 
 	def get_chunck(self, index):
+		#use self.chuncks instead of self.__chuncks to forth encryption happened
 		if index < 0 or index >= self.chuncks:
 			return None
 
-		f = open(self.__file_path, "rb")
-		f.seek(index * FileProcessor.__CHUNCK_SIZE)
+		cur_path = self.__file_path
+		if Config.is_encrypt():
+			cur_path = self.__file_path + ".tmp"
 
+		f = open(cur_path, "rb")
+		f.seek(index * FileProcessor.__CHUNCK_SIZE)
 
 		if index == self.chuncks - 1:
 			buf = f.read()
