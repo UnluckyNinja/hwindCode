@@ -4,7 +4,7 @@ import sys
 import argparse
 import videomanager.videomanager as videomanager
 
-parser = argparse.ArgumentParser(prog='VideoManagerCommandLine')
+parser = argparse.ArgumentParser(prog='video manager cli')
 subparsers = parser.add_subparsers(help='sub-command help')
 
 parser_list = subparsers.add_parser('list', help='list videos')
@@ -24,5 +24,8 @@ parser_delete.add_argument('id', help='video id')
 parser_delete.set_defaults(func=videomanager.delete_cmd)
 
 
-args = parser.parse_args(sys.argv[1:])
-args.func(args)
+if len(sys.argv) > 1:
+	args = parser.parse_args(sys.argv[1:])
+	args.func(args)
+else:
+	parser.print_help()
