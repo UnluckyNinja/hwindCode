@@ -1,14 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from FileProcessor import FileProcessor
-from VideoStoreOperator import *
-from VideoManager import *
-import Config
-import Encrypt
-
-Config.init_config()
-
-
+import videomanager.fileprocessor as fileprocessor
+import videomanager.videostoreoperator as videostoreoperator
+import videomanager.videomanager as videomanager
+import videomanager.config as config
+import videomanager.encrypt as encrypt
 
 path = "D:\\test.mkv"
 """
@@ -62,17 +58,17 @@ upload_chunck(buf, chk.path, chk.storagename, chk.container, chk.key)
 #download_video(videos[0].id, "./helloworldtest")
 
 with open(path, "rb") as in_f, open(path+".tmp", "wb") as out_f:
-	Encrypt.encrypt(in_f, out_f, "Password01!")
+	encrypt.encrypt(in_f, out_f, "Password01!")
 
 with open(path+".tmp", "rb") as in_f, open(path+".tmp2", "wb") as out_f:
-	Encrypt.decrypt(in_f, out_f, "Password01!")
+	encrypt.decrypt(in_f, out_f, "Password01!")
 
 with open(path+".tmp", "rb") as in_f, open(path+".tmp3", "wb") as out_f:
-	Encrypt.decrypt(in_f, out_f, "Password02!")
+	encrypt.decrypt(in_f, out_f, "Password02!")
 
-p1 = FileProcessor(path)
-p2 = FileProcessor(path+".tmp2")
-p3 = FileProcessor(path+".tmp3")
+p1 = fileprocessor.FileProcessor(path)
+p2 = fileprocessor.FileProcessor(path+".tmp2")
+p3 = fileprocessor.FileProcessor(path+".tmp3")
 
 print (p1.md5)
 print (p2.md5)

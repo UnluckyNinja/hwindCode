@@ -1,0 +1,10 @@
+{
+	"ConnectionString": {
+		"user": "x",
+		"password": "x",
+		"host": "x",
+		"database": "x"
+	},
+	"ChunckSizeMB": 20,
+	"pwd": "x"
+}

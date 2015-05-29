@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 import shutil
 from azure.storage import BlobService
-from FileProcessor import FileProcessor
-from VideoStoreOperator import *
-import Config
-import Encrypt
+
+import videomanager.fileprocessor as fileprocessor
+import videomanager.videostoreoperator as videostoreoperator
+import videomanager.config as config
+import videomanager.encrypt as encrypt
 
 def upload_chunck(buf, path, storagename, container, key):
 	blob_service = BlobService(account_name=storagename, account_key=key)
@@ -20,11 +21,11 @@ def  download_chunck(path, storagename, container, key):
 	return blob_service.get_blob_to_bytes(container, path)
 
 def upload_video(file_path):
-	vs_operator = VideoStoreOperator()
+	vs_operator = videostoreoperator.VideoStoreOperator()
 	video_id = vs_operator.create(file_path)
 	video_detils = vs_operator.get(video_id)
 
-	processor = FileProcessor(file_path)
+	processor = fileprocessor.FileProcessor(file_path)
 	count = len(video_detils.chuncks)
 	for i in range(count):
 		buf = processor.get_chunck(i)
@@ -32,7 +33,7 @@ def upload_video(file_path):
 		upload_chunck(buf, chk.path, chk.storagename, chk.container, chk.key)
 		
 def list_videos():
-	vs_operator = VideoStoreOperator()
+	vs_operator = videostoreoperator.VideoStoreOperator()
 	videos = vs_operator.list()
 	count = len(videos)
 	print ("id\t\t\t\tname")
@@ -42,7 +43,7 @@ def list_videos():
 	return videos
 
 def download_video(id, path=None):
-	vs_operator = VideoStoreOperator()
+	vs_operator = videostoreoperator.VideoStoreOperator()
 	video_detils = vs_operator.get(id)
 
 	if path == None:
@@ -60,20 +61,20 @@ def download_video(id, path=None):
 		f.write(buf)
 	f.close()
 
-	if Config.is_encrypt():
+	if config.is_encrypt():
 		with open(path, "rb") as in_f, open(decrypt_path, "wb") as out_f:
-			Encrypt.decrypt(in_f, out_f, Config.config["pwd"])
+			encrypt.decrypt(in_f, out_f, config.config["pwd"])
 	else:
 		shutil.move(path, decrypt_path)
 
-	processor = FileProcessor(decrypt_path)
+	processor = fileprocessor.FileProcessor(decrypt_path)
 	if processor.md5 == video_detils.video.md5:
 		print ("download finished. checksum matched")
 	else:
 		print ("download finished, but checksum doesn't match. Download failed.")
 
 def delete_video(id):
-	vs_operator = VideoStoreOperator()
+	vs_operator = videostoreoperator.VideoStoreOperator()
 	video_detils = vs_operator.get(id)
 	vs_operator.delete(id)
 	

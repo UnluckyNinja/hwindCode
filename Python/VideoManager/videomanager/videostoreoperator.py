@@ -3,8 +3,8 @@
 import uuid
 import mysql.connector
 import random
-from FileProcessor import FileProcessor
-import Config
+import videomanager.fileprocessor as fileprocessor
+import videomanager.config as config
 
 class VideoStoreOperator:
 	"""docstring for VideoStoreOperator"""
@@ -12,7 +12,7 @@ class VideoStoreOperator:
 	__config = None
 
 	def __init__(self):
-		self.__config = Config.config["ConnectionString"]
+		self.__config = config.config["ConnectionString"]
 
 	def get_storage_info(self):
 		result = []
@@ -31,7 +31,7 @@ class VideoStoreOperator:
 		return result
 
 	def  create(self, file_path):
-		processor = FileProcessor(file_path)
+		processor = fileprocessor.FileProcessor(file_path)
 		id = uuid.uuid4().hex
 
 		storage_info = self.get_storage_info()

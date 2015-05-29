@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 import os.path
 import hashlib
-import Config
-import Encrypt
+import videomanager.config as config
+import videomanager.encrypt as encrypt
 
 class FileProcessor:
 	"""docstring for FileProcessor"""
@@ -18,7 +18,7 @@ class FileProcessor:
 		self.__file_path = file_path
 		self.name = os.path.basename(file_path)
 		self.size = os.path.getsize(file_path)
-		FileProcessor.__CHUNCK_SIZE = Config.config["ChunckSizeMB"] * 1024 * 1024
+		FileProcessor.__CHUNCK_SIZE = config.config["ChunckSizeMB"] * 1024 * 1024
 		self.__md5 = None
 		self.__chuncks = None
 	
@@ -26,10 +26,10 @@ class FileProcessor:
 	def chuncks(self):
 		if self.__chuncks == None:
 			cur_size = 0
-			if Config.is_encrypt():
+			if config.is_encrypt():
 				tmp_path = self.__file_path + ".tmp"
 				with open(self.__file_path, "rb") as in_f, open(tmp_path, "wb") as out_f:
-					Encrypt.encrypt(in_f, out_f, Config.config["pwd"])
+					encrypt.encrypt(in_f, out_f, config.config["pwd"])
 				cur_size = os.path.getsize(tmp_path)
 			else:
 				cur_size = self.size
@@ -61,7 +61,7 @@ class FileProcessor:
 			return None
 
 		cur_path = self.__file_path
-		if Config.is_encrypt():
+		if config.is_encrypt():
 			cur_path = self.__file_path + ".tmp"
 
 		f = open(cur_path, "rb")
