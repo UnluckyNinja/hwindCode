@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import shutil
 from azure.storage import BlobService
+import azure.http
 
 import videomanager.fileprocessor as fileprocessor
 import videomanager.videostoreoperator as videostoreoperator
@@ -10,15 +11,28 @@ import videomanager.encrypt as encrypt
 
 def upload_chunck(buf, path, storagename, container, key):
 	blob_service = BlobService(account_name=storagename, account_key=key)
-	blob_service.put_block_blob_from_bytes(
-		container,
-		path,
-		buf
-    )
+	loop = 0;
+	while True:
+		try:
+			blob_service.put_block_blob_from_bytes(container,path,buf)
+			break
+		except azure.http.HTTPError as e:
+			loop = loop + 1
+			if loop >= 3:
+				raise e
 
-def  download_chunck(path, storagename, container, key):
+
+def download_chunck(path, storagename, container, key):
 	blob_service = BlobService(account_name=storagename, account_key=key)
-	return blob_service.get_blob_to_bytes(container, path)
+	loop = 0
+	
+	while True:
+		try:
+			return blob_service.get_blob_to_bytes(container, path)
+		except azure.http.HTTPError as e:
+			loop = loop + 1
+			if loop >= 3:
+				raise e
 
 def upload_video(file_path):
 	vs_operator = videostoreoperator.VideoStoreOperator()
