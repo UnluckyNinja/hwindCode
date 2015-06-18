@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block head_title %}PyVideo {% endblock %}
+{% block jumbotron_text%}
+<form action="/add_video" autocomplete="on", method="post" class="form-control">
+  {% csrf_token %}
+  name:<input type="text" name="fname"><br>
+  <input type="submit">
+</form>
+{% endblock%}
+
+{% block bottom_text%}
+{{tmpuser}}
+{% endblock%}

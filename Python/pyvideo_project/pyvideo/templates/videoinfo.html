@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block head_title %}PyVideo {% endblock %}
+{% block jumbotron_text%}
+    <h1>{{user.username}}</h1>
+    {% if videos %}
+        <table class="table">
+          <tr>
+            <th>User</th>
+            <th>VideoName</th>       
+            <th>Size</th>
+            <th>MD5</th>
+            <th>State</th>
+            <th>CreateTime</th>
+          </tr>
+          {% for video in videos %}
+          <tr>
+            <td>{{video.user.username}}</td>
+            <td>{{video.name}}</td>      
+            <td>{{video.size}}</td>
+            <td>{{video.md5}}</td>
+            <td>{{video.state}}</td>
+            <td>{{video.create_time}}</td>
+          </tr>
+          {% endfor %}
+        </table>
+    {% endif%}
+    <a id="add_video" href="/add_video" class="btn btn-default">
+    Upload Video
+    </a>
+{% endblock%}
+
+{% block bottom_text%}
+{% endblock%}
