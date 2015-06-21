@@ -3,6 +3,7 @@
 import shutil
 from azure.storage import BlobService
 import azure.http
+import os.path
 
 import videomanager.fileprocessor as fileprocessor
 import videomanager.videostoreoperator as videostoreoperator
@@ -62,10 +63,12 @@ def download_video(id, path=None):
 
 	if path == None:
 		decrypt_path = video_detils.video.name
-		path = video_detils.video.name + ".tmp"
+	elif os.path.isdir(path):
+		decrypt_path = os.path.join(path, video_detils.video.name)
 	else:
 		decrypt_path = path
-		path = path + ".tmp"
+
+	path = decrypt_path + ".tmp"
 
 	f = open(path, "wb")
 	count = len(video_detils.chuncks)
