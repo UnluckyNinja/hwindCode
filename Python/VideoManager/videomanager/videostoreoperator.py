@@ -90,7 +90,7 @@ class VideoStoreOperator:
 		cnx = mysql.connector.connect(**self.__config)
 		cursor = cnx.cursor()
 
-		query = ("SELECT id, name, size, md5 FROM videos")
+		query = ("SELECT id, name, size, md5 FROM videos order by name")
 		cursor.execute(query)
 		
 		for (id, name, size, md5) in cursor:

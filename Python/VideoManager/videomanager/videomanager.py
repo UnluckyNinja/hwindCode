@@ -52,7 +52,7 @@ def list_videos():
 	count = len(videos)
 	print ("id\t\t\t\tname")
 	for i in range(count):
-		print ("{0}\t\t\t\t{1}".format(videos[i].id, videos[i].name))
+		print ("{0}\t\t\t\t{1}".format(videos[i].name,videos[i].id))
 
 	return videos
 
