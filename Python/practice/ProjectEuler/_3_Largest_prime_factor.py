@@ -122,22 +122,26 @@ def divide_int_v2(n, list):
             i = i - 1
         i = i + 1
 
-ret = multi_mod(4, 7, 5)
-print(ret)
+def main():
+    ret = multi_mod(4, 7, 5)
+    print(ret)
 
-ret = pow_mod(9, 3, 100)
-print(ret)
+    ret = pow_mod(9, 3, 100)
+    print(ret)
 
-ret = miller_rabbin(3)
-print(ret)
+    ret = miller_rabbin(3)
+    print(ret)
 
-ret = miller_rabbin(97)
-print(ret)
+    ret = miller_rabbin(97)
+    print(ret)
 
-ret = miller_rabbin(93)
-print(ret)
+    ret = miller_rabbin(93)
+    print(ret)
 
-list = []
-divide_int(31233243214353646, list)
-print(list)
-print(max(list))
+    list = []
+    divide_int(31233243214353646, list)
+    print(list)
+    print(max(list))
+
+if __name__ == '__main__':
+    main()
