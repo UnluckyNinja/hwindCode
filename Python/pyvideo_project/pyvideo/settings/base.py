@@ -16,7 +16,6 @@ import json
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 def GetConfig(key):
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
     with open(path, "r") as fp:
@@ -28,7 +27,13 @@ def GetConfig(key):
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = GetConfig("SecretKey")
-print(SECRET_KEY)
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = '672mtxq&c4f27nq8o=v%24q+i)s&oz+nmhq3bht&ldb_5jhv)7'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 #DEBUG = False
 
@@ -44,6 +49,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'pyvideo.apps.videoinfo',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -70,10 +76,41 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # Required by allauth template tags
+                "django.core.context_processors.request",
+                # allauth specific context processors
+                "allauth.account.context_processors.account",
+                "allauth.socialaccount.context_processors.socialaccount",
             ],
         },
     },
 ]
+
+AUTHENTICATION_BACKENDS = (
+    # Default backend -- used to login by username in Django admin
+    "django.contrib.auth.backends.ModelBackend",
+    # `allauth` specific authentication methods, such as login by e-mail
+    "allauth.account.auth_backends.AuthenticationBackend",
+)
+
+INSTALLED_APPS += (
+    # The Django sites framework is required
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    # Login via Google
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.weibo',
+    'allauth.socialaccount.providers.baidu',
+)
+ 
+SITE_ID = 2
+
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_VERIFICATION = "none"
+SOCIALACCOUNT_QUERY_EMAIL = True
+LOGIN_REDIRECT_URL = "/"
 
 WSGI_APPLICATION = 'pyvideo.wsgi.application'
 
