@@ -1,8 +1,7 @@
 .pyc
 .DS_Store
 __pycache__
-VideoManager/config/config.json
-pyvideo/settings/config.json
+Python/pyvideo_project/pyvideo/settings/config.json
 py3_env
 pyvideo_dev
 pyvideo_test
