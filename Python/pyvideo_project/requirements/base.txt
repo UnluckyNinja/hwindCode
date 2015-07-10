@@ -1,4 +1,4 @@
 Django==1.8
---allow-external mysql-connector-python
-mysql-connector-python==2.0.3
+git+https://github.com/multiplay/mysql-connector-python
 django-allauth
+djangorestframework
