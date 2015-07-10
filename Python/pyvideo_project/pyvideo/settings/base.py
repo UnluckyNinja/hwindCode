@@ -46,7 +46,9 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'pyvideo.apps.videoinfo',
+    'pyvideo.apps.videoinfo2',
 )
 
 MIDDLEWARE_CLASSES = (
