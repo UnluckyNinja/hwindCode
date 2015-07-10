@@ -64,7 +64,7 @@ class Video(models.Model):
     #Relations
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        related_name = 'videos',
+        related_name = 'videos1',
         verbose_name = 'user'
         )
     

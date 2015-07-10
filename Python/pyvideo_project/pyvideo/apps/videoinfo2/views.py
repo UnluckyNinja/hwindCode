@@ -1,11 +1,22 @@
+import uuid
+import random
+import pdb
 from . import models
-from .models import Storage
+from .models import Storage, Video, VideoFile
 from . import serializers
-from .serializers import StorageSerializer
+from .serializers import StorageSerializer, VideoSerializer, VideoFileSerializer, VideoDetailSerializer
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+
+Chunck_Size = 20 * 1024 * 1024
+
+def estimate_chuncks(size):
+    if size % Chunck_Size == 0:
+        return size // Chunck_Size
+    else:
+        return size // Chunck_Size + 1
 
 class StorageList(APIView):
     def get(self, request, format=None):
@@ -46,3 +57,57 @@ class StorageDetail(APIView):
         storage.delete()
         return Response(status = status.HTTP_204_NO_CONTENT)
 
+class VideoList(APIView):
+    def get(self, request, format=None):
+        videos = Video.objects.all()
+        serializer = VideoSerializer(videos, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = VideoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            chuncks = estimate_chuncks(serializer.instance.size)
+            storages = Storage.objects.all()
+            for i in range(0, chuncks):
+                vf = VideoFile()
+                vf.videoid = serializer.instance
+                vf.path = uuid.uuid4().hex
+                rd = random.randint(0, len(storages)-1)
+                vf.storageid = storages[rd]
+                vf.index = i
+                vf.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.error, status = status.HTTP_404_BAD_REQUEST)
+
+class VideoDetail(APIView):
+    def get_object(self, pk):
+        try:
+            return Video.objects.get(id=pk)
+        except Video.DoesNotExist:
+            raise Http404
+
+    def get_vf_object(self, pk):
+        try:
+            return VideoFile.objects.filter(videoid__exact=pk)
+        except VideoFile.DoesNotExist:
+            return None
+
+    def get(self, request, pk, format=None):
+        video = self.get_object(pk)
+        vfs = self.get_vf_object(pk)
+        #pdb.set_trace()
+        data = {'video': VideoSerializer(video).data, 'video_files': VideoFileSerializer(vfs, many=True).data}
+        serializer = VideoDetailSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data)
+
+    def delete(self, request, pk, format=None):
+        video = self.get_object(pk)
+        vfs = self.get_vf_object(pk)
+
+        if vfs != None:
+            vfs.delete()
+        if video != None:
+            video.delete()
+        return Response(status = status.HTTP_204_NO_CONTENT)
