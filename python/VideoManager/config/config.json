@@ -1,0 +1,10 @@
+{
+	"ConnectionString": {
+		"user": "hwind",
+		"password": "Password01!",
+		"host": "hwindvm.cloudapp.net",
+		"database": "movieinfo"
+	},
+	"ChunckSizeMB": 20,
+	"pwd": "Password01!"
+}
