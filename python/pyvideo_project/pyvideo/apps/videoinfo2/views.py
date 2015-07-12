@@ -1,6 +1,7 @@
 import uuid
 import random
 import pdb
+from collections import OrderedDict
 from . import models
 from .models import Storage, Video, VideoFile
 from . import serializers
@@ -96,11 +97,10 @@ class VideoDetail(APIView):
     def get(self, request, pk, format=None):
         video = self.get_object(pk)
         vfs = self.get_vf_object(pk)
-        #pdb.set_trace()
-        data = {'video': VideoSerializer(video).data, 'video_files': VideoFileSerializer(vfs, many=True).data}
-        serializer = VideoDetailSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        return Response(serializer.data)
+        data = OrderedDict({'video': VideoSerializer(video).data, 'video_files': VideoFileSerializer(vfs, many=True).data})
+        #serializer = VideoDetailSerializer(data)
+        #serializer.is_valid(raise_exception=True)
+        return Response(data)
 
     def delete(self, request, pk, format=None):
         video = self.get_object(pk)
