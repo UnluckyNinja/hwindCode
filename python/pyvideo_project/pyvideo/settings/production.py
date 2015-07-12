@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from .base import *
-DEBUG = True
+DEBUG = False
 
 DATABASES = GetConfig("Databases")
 
-STATIC_ROOT = '/var/www/pyvideo_project/pyvideo/static'
+STATIC_ROOT = '/var/www/pyvideo_project/staticfiles'
+
+ALLOWED_HOSTS = ['*']
