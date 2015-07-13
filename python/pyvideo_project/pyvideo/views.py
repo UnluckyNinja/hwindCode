@@ -2,11 +2,11 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 
-from .apps.videoinfo import models as videoinfo_model
+from .apps.videoinfo2 import models as videoinfo2_model
  
 def home(request):
     if request.user.is_authenticated():
-        videos = videoinfo_model.list_videoinfo(request.user.id)
+        videos = videoinfo2_model.list_videoinfo(request.user.id)
         return render(request, "videoinfo.html", {'videos':videos, 'tmpuser':request.user})
 
     else:
@@ -22,5 +22,5 @@ def  add_video(request):
         fname = request.POST["fname"]
         size = 1023
         md5 = "hello world"
-        videoinfo_model.upload_videoinfo(request.user, fname, size, md5)
+        videoinfo2_model.upload_videoinfo(request.user, fname, size, md5)
         return home(request)

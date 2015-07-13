@@ -169,3 +169,14 @@ class VideoFile(models.Model):
     class Meta:
         verbose_name = 'VideoFile'
         verbose_name_plural = 'VideoFiles'
+
+def list_videoinfo(userid):
+    return Video.objects.filter(user = userid)
+
+def upload_videoinfo(user_account, video_name, video_size, video_md5):
+    v = Video(user = user_account, name = video_name, size = video_size, md5 = video_md5, state = 0)
+    v.save()
+
+def delete_videoinfo(video_id):
+    v = Video.objects.filter(id = video_id)
+    v.delete()

@@ -4,6 +4,4 @@ DEBUG = False
 
 DATABASES = GetConfig("Databases")
 
-STATIC_ROOT = '/var/www/pyvideo_project/staticfiles'
-
 ALLOWED_HOSTS = ['*']

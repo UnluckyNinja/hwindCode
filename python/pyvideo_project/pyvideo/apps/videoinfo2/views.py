@@ -97,7 +97,9 @@ class VideoDetail(APIView):
     def get(self, request, pk, format=None):
         video = self.get_object(pk)
         vfs = self.get_vf_object(pk)
-        data = OrderedDict({'video': VideoSerializer(video).data, 'video_files': VideoFileSerializer(vfs, many=True).data})
+        data = OrderedDict({'video': VideoSerializer(video).data})
+        data['video_files'] = VideoFileSerializer(vfs, many=True).data
+        #data = OrderedDict({'video': VideoSerializer(video).data, 'video_files': VideoFileSerializer(vfs, many=True).data})
         #serializer = VideoDetailSerializer(data)
         #serializer.is_valid(raise_exception=True)
         return Response(data)
