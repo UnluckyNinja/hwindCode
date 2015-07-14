@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render
 from django.http import HttpResponse
+import os
 
 from .apps.videoinfo2 import models as videoinfo2_model
  
@@ -10,7 +11,11 @@ def home(request):
         return render(request, "videoinfo.html", {'videos':videos, 'tmpuser':request.user})
 
     else:
-        return render(request, "index.html", {})
+        info = "environment info: "
+        for key in os.environ:
+            if key.startswith('SSL_'):
+                info = info + " " + key + "::" + os.environ[key] + "    "
+        return render(request, "index.html", {'envinfo':info})
 
 def  add_video(request):
     if request.user.is_authenticated() == False:

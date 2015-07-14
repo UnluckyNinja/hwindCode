@@ -14,4 +14,10 @@ from django.core.wsgi import get_wsgi_application
 sys.path.append("/var/www/pyvideo_project")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "pyvideo.settings.production")
 
-application = get_wsgi_application()
+_application = get_wsgi_application()
+
+def application(environ, start_response):
+	for key in environ:
+    	if key.startswith('SSL_'):
+        	os.environ[key] = environ[key]
+    return _application(environ, start_response)
