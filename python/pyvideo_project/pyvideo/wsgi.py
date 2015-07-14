@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 WSGI config for pyvideo project.
 
@@ -17,7 +18,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "pyvideo.settings.production")
 _application = get_wsgi_application()
 
 def application(environ, start_response):
-	for key in environ:
-    	if key.startswith('SSL_'):
-        	os.environ[key] = environ[key]
+    for key in environ:
+        if key.startswith('SSL_'):
+            os.environ[key] = environ[key]
     return _application(environ, start_response)
