@@ -13,5 +13,9 @@ def init_config():
 
 def is_encrypt():
 	return config["pwd"] != None and config["pwd"] != ""
+
+def get_client_cert_path():
+    return config["client_cert"]
+    pass
 	
 	
