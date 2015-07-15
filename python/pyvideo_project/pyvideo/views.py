@@ -12,9 +12,8 @@ def home(request):
 
     else:
         info = "environment info: "
-        for key in os.environ:
-            if key.startswith('SSL_'):
-                info = info + " " + key + "::" + os.environ[key] + "    "
+        for key in request.META:
+            info = info + " " + key + "::" + str(request.META[key]) + "    "
         return render(request, "index.html", {'envinfo':info})
 
 def  add_video(request):

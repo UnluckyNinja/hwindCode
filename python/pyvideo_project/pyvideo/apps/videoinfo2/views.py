@@ -65,8 +65,8 @@ class VideoList(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        if 'SSL_CLIENT_I_DN_CN' in os.environ:
-            cn = os.environ['SSL_CLIENT_I_DN_CN']
+        if 'SSL_CLIENT_S_DN_CN' in request.META:
+            cn = request.META['SSL_CLIENT_S_DN_CN']
             if cn == 'dev at hwind-linux':
                 user = 2
             else:
