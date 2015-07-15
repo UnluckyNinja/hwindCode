@@ -12,15 +12,15 @@ class pyVideoClient:
 
     def _get(self, url):
         cert_path  = config.get_client_cert_path()
-        print(url)
-        print(cert_path)
         return requests.get(url, verify=False, cert=cert_path)
 
     def _post(self, url, data):
-        pass
+        cert_path = config.get_client_cert_path()
+        return requests.post(url, verify=False, cert=cert_path, data=data)
 
     def  _delete(self, url):
-        pass
+        cert_path = config.get_client_cert_path()
+        return requests.delete(url, verify=False, cert=cert_path)
 
 
     def getStorageInfo(self):
@@ -47,8 +47,21 @@ class pyVideoClient:
         finally:
             return ret
 
+    def createVideo(self, video):
+        video_url = urllib.parse.urljoin(self._base_url, "video")
+        data = {'name': video.name, "size": video.size, "md5": video.md5, "state": 0}
+        ret = None
+        try:
+            result = self._post(video_url, data)
+            if result.status_code == 201:
+                ret = result.json()
+        except :
+            pass
+        finally:
+            return ret
+
     def getVideo(self, id):
-        video_detail_url = urllib.parse.urljoin(urllib.parse.urljoin(self._base_url, "video"), id)
+        video_detail_url = urllib.parse.urljoin(urllib.parse.urljoin(self._base_url, "video/"), id)
         ret = []
         try:
             result = self._get(video_detail_url)
@@ -60,7 +73,7 @@ class pyVideoClient:
             return ret
 
     def deleteVideo(self, id):
-        video_detail_url = urllib.parse.urljoin(urllib.parse.urljoin(self._base_url, "video"), id)
+        video_detail_url = urllib.parse.urljoin(urllib.parse.urljoin(self._base_url, "video/"), id)
         ret = False
         try:
             result = self._delete(video_detail_url)

@@ -25,7 +25,7 @@ parser_delete.set_defaults(func=videomanager.delete_cmd)
 
 
 if len(sys.argv) > 1:
-	args = parser.parse_args(sys.argv[1:])
-	args.func(args)
+    args = parser.parse_args(sys.argv[1:])
+    args.func(args)
 else:
-	parser.print_help()
+    parser.print_help()

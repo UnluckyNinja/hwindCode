@@ -1,6 +1,6 @@
 import uuid
 import random
-import pdb
+import os
 from collections import OrderedDict
 from . import models
 from .models import Storage, Video, VideoFile
@@ -65,6 +65,16 @@ class VideoList(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
+        if 'SSL_CLIENT_I_DN_CN' in os.environ:
+            cn = os.environ['SSL_CLIENT_I_DN_CN']
+            if cn == 'dev at hwind-linux':
+                user = 2
+            else:
+                user = 1
+        else:
+            user = 3
+
+        request.data['user'] = user
         serializer = VideoSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -79,7 +89,7 @@ class VideoList(APIView):
                 vf.index = i
                 vf.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.error, status = status.HTTP_404_BAD_REQUEST)
+        return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
 
 class VideoDetail(APIView):
     def get_object(self, pk):

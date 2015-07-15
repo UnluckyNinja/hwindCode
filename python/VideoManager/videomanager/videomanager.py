@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import shutil
+import azure
 from azure.storage import BlobService
 import azure.http
 import os.path
@@ -11,104 +12,110 @@ import videomanager.config as config
 import videomanager.encrypt as encrypt
 
 def upload_chunck(buf, path, storagename, container, key):
-	blob_service = BlobService(account_name=storagename, account_key=key)
-	loop = 0;
-	while True:
-		try:
-			blob_service.put_block_blob_from_bytes(container,path,buf)
-			break
-		except azure.http.HTTPError as e:
-			loop = loop + 1
-			if loop >= 3:
-				raise e
+    blob_service = BlobService(account_name=storagename, account_key=key)
+    loop = 0;
+    while True:
+        try:
+            blob_service.put_block_blob_from_bytes(container,path,buf)
+            break
+        except azure.http.HTTPError as e:
+            loop = loop + 1
+            if loop >= 3:
+                raise e
 
 
 def download_chunck(path, storagename, container, key):
-	blob_service = BlobService(account_name=storagename, account_key=key)
-	loop = 0
-	
-	while True:
-		try:
-			return blob_service.get_blob_to_bytes(container, path)
-		except azure.http.HTTPError as e:
-			loop = loop + 1
-			if loop >= 3:
-				raise e
+    blob_service = BlobService(account_name=storagename, account_key=key)
+    loop = 0
+    
+    while True:
+        try:
+            return blob_service.get_blob_to_bytes(container, path)
+        except azure.http.HTTPError as e:
+            loop = loop + 1
+            if loop >= 3:
+                raise e
 
 def upload_video(file_path):
-	vs_operator = videostoreoperator.VideoStoreOperator()
-	video_id = vs_operator.create(file_path)
-	video_detils = vs_operator.get(video_id)
+    vs_operator = videostoreoperator.VideoStoreOperator()
+    video_id = vs_operator.create(file_path)
+    if video_id == None:
+        print("Error occured during creating file")
+        return
+    video_detils = vs_operator.get(video_id)
 
-	processor = fileprocessor.FileProcessor(file_path)
-	count = len(video_detils.chuncks)
-	for i in range(count):
-		buf = processor.get_chunck(i)
-		chk = video_detils.chuncks[i]
-		upload_chunck(buf, chk.path, chk.storagename, chk.container, chk.key)
-		
+    processor = fileprocessor.FileProcessor(file_path)
+    count = len(video_detils.chuncks)
+    for i in range(count):
+        buf = processor.get_chunck(i)
+        chk = video_detils.chuncks[i]
+        upload_chunck(buf, chk.path, chk.storagename, chk.container, chk.key)
+        
 def list_videos():
-	vs_operator = videostoreoperator.VideoStoreOperator()
-	videos = vs_operator.list()
-	count = len(videos)
-	print ("id\t\t\t\tname")
-	for i in range(count):
-		print ("{0}\t\t\t\t{1}".format(videos[i].name,videos[i].id))
+    vs_operator = videostoreoperator.VideoStoreOperator()
+    videos = vs_operator.list()
+    count = len(videos)
+    print ("id\t\t\t\tname")
+    for i in range(count):
+        print ("{0}\t\t\t\t{1}".format(videos[i].name,videos[i].id))
 
-	return videos
+    return videos
 
 def download_video(id, path=None):
-	vs_operator = videostoreoperator.VideoStoreOperator()
-	video_detils = vs_operator.get(id)
+    vs_operator = videostoreoperator.VideoStoreOperator()
+    video_detils = vs_operator.get(id)
 
-	if path == None:
-		decrypt_path = video_detils.video.name
-	elif os.path.isdir(path):
-		decrypt_path = os.path.join(path, video_detils.video.name)
-	else:
-		decrypt_path = path
+    if path == None:
+        decrypt_path = video_detils.video.name
+    elif os.path.isdir(path):
+        decrypt_path = os.path.join(path, video_detils.video.name)
+    else:
+        decrypt_path = path
 
-	path = decrypt_path + ".tmp"
+    path = decrypt_path + ".tmp"
 
-	f = open(path, "wb")
-	count = len(video_detils.chuncks)
-	for i in range(count):
-		chk = video_detils.chuncks[i]
-		buf = download_chunck(chk.path, chk.storagename, chk.container, chk.key)
-		f.write(buf)
-	f.close()
+    f = open(path, "wb")
+    count = len(video_detils.chuncks)
+    for i in range(count):
+        chk = video_detils.chuncks[i]
+        buf = download_chunck(chk.path, chk.storagename, chk.container, chk.key)
+        f.write(buf)
+    f.close()
 
-	if config.is_encrypt():
-		with open(path, "rb") as in_f, open(decrypt_path, "wb") as out_f:
-			encrypt.decrypt(in_f, out_f, config.config["pwd"])
-	else:
-		shutil.move(path, decrypt_path)
+    if config.is_encrypt():
+        with open(path, "rb") as in_f, open(decrypt_path, "wb") as out_f:
+            encrypt.decrypt(in_f, out_f, config.config["pwd"])
+    else:
+        shutil.move(path, decrypt_path)
 
-	processor = fileprocessor.FileProcessor(decrypt_path)
-	if processor.md5 == video_detils.video.md5:
-		print ("download finished. checksum matched")
-	else:
-		print ("download finished, but checksum doesn't match. Download failed.")
+    processor = fileprocessor.FileProcessor(decrypt_path)
+    if processor.md5 == video_detils.video.md5:
+        print ("download finished. checksum matched")
+    else:
+        print ("download finished, but checksum doesn't match. Download failed.")
 
 def delete_video(id):
-	vs_operator = videostoreoperator.VideoStoreOperator()
-	video_detils = vs_operator.get(id)
-	vs_operator.delete(id)
-	
-	count = len(video_detils.chuncks)
-	for i in range(count):
-		chk = video_detils.chuncks[i]
-		blob_service = BlobService(account_name=chk.storagename, account_key=chk.key)
-		blob_service.delete_blob(chk.container, chk.path)
+    vs_operator = videostoreoperator.VideoStoreOperator()
+    video_detils = vs_operator.get(id)
+    vs_operator.delete(id)
+    
+    count = len(video_detils.chuncks)
+    for i in range(count):
+        chk = video_detils.chuncks[i]
+        blob_service = BlobService(account_name=chk.storagename, account_key=chk.key)
+        try:
+            blob_service.delete_blob(chk.container, chk.path)
+        except azure.WindowsAzureMissingResourceError:
+            pass
 
 def upload_cmd(options):
-	upload_video(options.src)
+    upload_video(options.src)
 
 def download_cmd(options):
-	download_video(options.id, options.dest)
+    download_video(options.id, options.dest)
 
 def list_cmd(options):
-	return list_videos()
+    return list_videos()
 
 def delete_cmd(options):
-	delete_video(options.id)
+    delete_video(options.id)
