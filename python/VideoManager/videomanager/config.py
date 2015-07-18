@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import json
+import os
 
 config = None
 
 def init_config():
     global config
     if config == None:
-        fp = open("config/config.json", "r")
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        fp = open(os.path.join(base_dir, "config/config.json"), "r")
         config = json.load(fp)
         fp.close()
 
