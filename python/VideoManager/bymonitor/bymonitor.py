@@ -39,6 +39,7 @@ class Monitor(object):
         self.__complete_queue = collections.deque(uploaded_files)
 
         self.__stop = False
+        self.__running_state = {}
 
     def __list_files(self, path):
         if not os.path.isdir(path):
@@ -72,10 +73,22 @@ class Monitor(object):
                 self.__list_worker.join()
                 self.__download_worker.join()
                 self.__upload_worker.join()
+            elif cmd == "state":
+                self.__show_state()
+
+    def __show_state(self):
+        print("download queue:")
+        print(self.__to_download_queue)
+        print("upload queue:")
+        print(self.__to_upload_queue)
+        print("workers:")
+        print(self.__running_state)
+
+    def __set_state(self, key, value):
+        self.__running_state[key] = value
 
     def list_worker(self):
         while not self.__stop:
-            #pdb.set_trace()
             files = self.__by_list()
             for f in files:
                 if f in self.__all_processed:
@@ -115,12 +128,17 @@ class Monitor(object):
         return new_path
 
     def __upload_file(self, path):
+        self.__set_state("uploading", path)
         videomanager.upload_video(path)
         print("file {0} is uploaded".format(path))
+        self.__set_state("uploading", "")
 
     def __by_execute(self, cmd):
         byexecutor = os.path.join(self.__base_dir, "byexecutor.py")
-        cmdline = ["C:\\Python27\\Python.exe", byexecutor]
+        if os.name == 'posix':
+            cmdline = ["/usr/local/bin/python", byexecutor]
+        else:
+            cmdline = ["C:\\Python27\\Python.exe", byexecutor]
         with subprocess.Popen(cmdline, stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True) as proc:
             out, err = proc.communicate(cmd)
             return out
@@ -134,6 +152,7 @@ class Monitor(object):
         return None
 
     def __by_list(self):
+        self.__set_state("listing", True)
         cmd = "list"
         results = self.__by_execute(cmd)
         #result_lines = results.split('\n')
@@ -151,12 +170,14 @@ class Monitor(object):
             elif result_lines[i] == "/apps/bypy ($t $f):":
                 find_flag = True
 
-        #pdb.set_trace()
+        self.__set_state("listing", False)
         return files
 
     def __by_download(self, src, dest):
+        self.__set_state("downloading", src)
         cmd = "download '{0}' '{1}'".format(src, dest)
         results = self.__by_execute(cmd)
+        self.__set_state("downloading", "")
 
 if __name__ == '__main__':
     monitor = Monitor()
