@@ -1,32 +1,58 @@
 {% extends "base.html" %}
 {% block head_title %}PyVideo {% endblock %}
 {% block jumbotron_text%}
-    <h1>{{user.username}}</h1>
-    {% if videos %}
-        <table class="table">
-          <tr>
-            <th>User</th>
-            <th>VideoName</th>       
-            <th>Size</th>
-            <th>MD5</th>
-            <th>State</th>
-            <th>CreateTime</th>
-          </tr>
-          {% for video in videos %}
-          <tr>
-            <td>{{video.user.username}}</td>
-            <td>{{video.name}}</td>      
-            <td>{{video.size}}</td>
-            <td>{{video.md5}}</td>
-            <td>{{video.state}}</td>
-            <td>{{video.create_time}}</td>
-          </tr>
-          {% endfor %}
-        </table>
-    {% endif%}
-    <a id="add_video" href="/add_video" class="btn btn-default">
-    Upload Video
-    </a>
+      <div class="container">
+        <div class="row">
+          <div class="col-md-1">
+            <h1>{{user.username}}</h1>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-1"></div>
+        </div>
+        <form role="form" action="/delete_video" id="video_form" method="post">
+          {% csrf_token %}
+        <div class="row">
+          <div class="col-md-1">
+            <a id="add_video" href="/add_video" class="btn btn-default">Upload</a>              
+          </div>
+          <div class="col-md-1">
+            <button type="submit" class="btn btn-danger disabled" id="video_delete_btn">Delete </button>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>
+                      <label class="checkbox-inline"><input type="checkbox" value="" id="video_checkall">VideoName</label>
+                  </th>       
+                  <th>Size</th>
+                  <th>MD5</th>
+                  <th>State</th>
+                  <th>CreateTime</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for video in videos %}
+                <tr>
+                  <td>
+                      <label class="checkbox-inline"><input type="checkbox" name="video_check" value="{{video.id}}" id="video_check-{{forloop.counter}}">{{video.name}}</label>
+                  </td>      
+                  <td>{{video.size}}</td>
+                  <td>{{video.md5}}</td>
+                  <td>{{video.state}}</td>
+                  <td>{{video.create_time}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        </form>
+      </div>
 {% endblock%}
 
 {% block bottom_text%}

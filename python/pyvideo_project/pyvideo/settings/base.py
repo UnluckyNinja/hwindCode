@@ -103,8 +103,6 @@ INSTALLED_APPS += (
     'allauth.socialaccount.providers.weibo',
     'allauth.socialaccount.providers.baidu',
 )
- 
-SITE_ID = 2
 
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = "none"
