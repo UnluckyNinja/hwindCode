@@ -108,8 +108,28 @@ def delete_video(id):
         except azure.WindowsAzureMissingResourceError:
             pass
 
+def get_files_from_path(file_path):
+    if not os.path.isdir(file_path):
+        return [file_path]
+
+    results = []
+    files = os.listdir(file_path)
+    for item in files:
+        path = os.path.join(file_path, item)
+        if not os.path.isdir(path):
+            results.append(path)
+        else:
+            sub_results = get_files_from_path(path)
+            results = results + sub_results
+    return results
+
 def upload_cmd(options):
-    upload_video(options.src)
+    files = get_files_from_path(options.src)
+    print("{0} files need to be uploaded".format(len(files)))
+
+    for index, item in enumerate(files):
+        print("progress: {0}/{1}".format(index, len(files)))
+        upload_video(item)
 
 def download_cmd(options):
     download_video(options.id, options.dest)
