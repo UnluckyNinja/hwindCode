@@ -21,7 +21,11 @@ class FileProcessor:
         FileProcessor.__CHUNCK_SIZE = config.config["ChunckSizeMB"] * 1024 * 1024
         self.__md5 = None
         self.__chuncks = None
-    
+
+    def __del__(self):
+        if config.is_encrypt() and os.path.exists(self.__file_path + ".tmp"):
+            os.remove(self.__file_path + ".tmp")
+
     @property
     def chuncks(self):
         if self.__chuncks == None:
