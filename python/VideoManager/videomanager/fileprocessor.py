@@ -23,6 +23,9 @@ class FileProcessor:
         self.__chuncks = None
 
     def __del__(self):
+        self.close()
+
+    def close():
         if config.is_encrypt() and os.path.exists(self.__file_path + ".tmp"):
             os.remove(self.__file_path + ".tmp")
 

@@ -50,6 +50,7 @@ def upload_video(file_path):
         buf = processor.get_chunck(i)
         chk = video_detils.chuncks[i]
         upload_chunck(buf, chk.path, chk.storagename, chk.container, chk.key)
+    processor.close()
         
 def list_videos():
     vs_operator = videostoreoperator.VideoStoreOperator()
@@ -93,6 +94,7 @@ def download_video(id, path=None):
         print ("download finished. checksum matched")
     else:
         print ("download finished, but checksum doesn't match. Download failed.")
+    processor.close()
 
 def delete_video(id):
     vs_operator = videostoreoperator.VideoStoreOperator()
@@ -128,7 +130,7 @@ def upload_cmd(options):
     print("{0} files need to be uploaded".format(len(files)))
 
     for index, item in enumerate(files):
-        print("progress: {0}/{1}".format(index, len(files)))
+        print("progress: {0}/{1}    {2}".format(index, len(files), item))
         upload_video(item)
 
 def download_cmd(options):
