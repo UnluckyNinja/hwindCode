@@ -8,7 +8,9 @@ import pdb
 import videomanager.config as config
 
 class pyVideoClient:
-    _base_url = "https://hwind-linux.cloudapp.net/rest/"
+    def __init__(self):
+        self._base_url = "https://hwind-linux.cloudapp.net/rest/"
+        #self._base_url = "http://127.0.0.1:8000/rest/"
 
     def _get(self, url):
         cert_path  = config.get_client_cert_path()
@@ -17,6 +19,10 @@ class pyVideoClient:
     def _post(self, url, data):
         cert_path = config.get_client_cert_path()
         return requests.post(url, verify=False, cert=cert_path, data=data)
+
+    def _put(self, url, data):
+        cert_path = config.get_client_cert_path()
+        return requests.put(url, verify=False, cert=cert_path, data=data)
 
     def  _delete(self, url):
         cert_path = config.get_client_cert_path()
@@ -67,6 +73,24 @@ class pyVideoClient:
             result = self._get(video_detail_url)
             if result.status_code == 200:
                 ret = result.json()
+        except :
+            pass
+        finally:
+            return ret
+
+    def updateVideoState(self, id, new_state):
+        video_detail_url = urllib.parse.urljoin(urllib.parse.urljoin(self._base_url, "video/"), id)
+        ret = None
+        try:
+            result = self._get(video_detail_url)
+            if result.status_code != 200:
+                return None
+
+            video = result.json()['video']
+            video['state'] = new_state
+            result2 = self._put(video_detail_url, video)
+            if result2.status_code == 201:
+                ret = result2.json()
         except :
             pass
         finally:

@@ -30,7 +30,7 @@ class StorageList(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status = status.HTTP_201_CREATED)
-        return Response(serializer.error, status = status.HTTP_404_BAD_REQUEST)
+        return Response(serializer.errors, status = status.HTTP_404_BAD_REQUEST)
 
 class StorageDetail(APIView):
     def get_object(self, pk):
@@ -51,7 +51,7 @@ class StorageDetail(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status = status.HTTP_201_CREATED)
-        return Response(serializer.error, status = status.HTTP_404_BAD_REQUEST)
+        return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
         storage = self.get_object(pk)
@@ -113,6 +113,29 @@ class VideoDetail(APIView):
         #serializer = VideoDetailSerializer(data)
         #serializer.is_valid(raise_exception=True)
         return Response(data)
+
+    def put(self, request, pk, format=None):
+        if 'SSL_CLIENT_S_DN_CN' in request.META:
+            cn = request.META['SSL_CLIENT_S_DN_CN']
+            if cn == 'dev at hwind-linux':
+                user = 2
+            else:
+                user = 1
+        else:
+            user = 3
+
+        video = self.get_object(pk)
+        if video.user.id != user:
+            return Response("Unauthorized request", status=status.HTTP_401_UNAUTHORIZED)
+        rdata = request.data.copy()
+        rdata['user'] = user
+        serializer = VideoSerializer(data=rdata)
+        if serializer.is_valid():
+            video.state = serializer.data['state']
+            video.save()
+            serializer2 = VideoSerializer(video)
+            return Response(serializer2.data, status = status.HTTP_201_CREATED)
+        return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
         video = self.get_object(pk)

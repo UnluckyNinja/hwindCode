@@ -51,7 +51,9 @@ def upload_video(file_path):
         chk = video_detils.chuncks[i]
         upload_chunck(buf, chk.path, chk.storagename, chk.container, chk.key)
     processor.close()
-        
+
+    vs_operator.updateState(video_id, 1)
+
 def list_videos():
     vs_operator = videostoreoperator.VideoStoreOperator()
     videos = vs_operator.list()

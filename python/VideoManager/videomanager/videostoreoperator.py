@@ -158,6 +158,11 @@ class VideoStoreOperator:
         # cursor.close()
         # cnx.close()
 
+    def updateState(self, id, new_state):
+        client = pyVideoClient.pyVideoClient()
+        ret = client.updateVideoState(id, new_state)
+        return ret
+
 class Video:
     """docstring for Video"""
 
