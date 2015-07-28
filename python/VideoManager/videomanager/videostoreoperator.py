@@ -160,10 +160,6 @@ class VideoStoreOperator:
 
 class Video:
     """docstring for Video"""
-    id = None
-    name = None
-    size = 0
-    md5 = None
 
     def __init__(self, id, name, size, md5):
         self.id = id
@@ -173,12 +169,6 @@ class Video:
 
 class Chunck:
     """docstring for Chunck"""
-
-    index = -1
-    path = None
-    storagename = None
-    container = None
-    key = None
 
     def __init__(self, index, path, storagename, container, key):
         self.index = index
@@ -190,11 +180,9 @@ class Chunck:
 class VideoDetails:
     """docstring for VideoDetails"""
 
-    video = None
-    chuncks = {}
-
     def __init__(self, video):
         self.video = video
+        self.chuncks = {}
     
     def append_chunck(self, chunck):
         self.chuncks[chunck.index] = chunck
@@ -202,10 +190,6 @@ class VideoDetails:
 class Storage(object):
     """docstring for Storage"""
 
-    id = None
-    name = None
-    container = None
-    key = None
     def __init__(self, id, name, container, key):
         self.id = id
         self.name = name
