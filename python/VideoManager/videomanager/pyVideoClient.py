@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import requests
+requests.packages.urllib3.disable_warnings()
 import json
 import os
 import urllib.parse
 import pdb
 import videomanager.config as config
+
 
 class pyVideoClient:
     def __init__(self):
