@@ -18,7 +18,7 @@ def upload_chunck(buf, path, storagename, container, key):
         try:
             blob_service.put_block_blob_from_bytes(container,path,buf)
             break
-        except azure.http.HTTPError as e:
+        except (azure.http.HTTPError, TimeoutError) as e:
             loop = loop + 1
             if loop >= 3:
                 raise e
@@ -31,7 +31,7 @@ def download_chunck(path, storagename, container, key):
     while True:
         try:
             return blob_service.get_blob_to_bytes(container, path)
-        except azure.http.HTTPError as e:
+        except (azure.http.HTTPError, TimeoutError) as e:
             loop = loop + 1
             if loop >= 3:
                 raise e
@@ -133,10 +133,17 @@ def upload_cmd(options):
 
     for index, item in enumerate(files):
         print("progress: {0}/{1}    {2}".format(index, len(files), item))
-        upload_video(item)
+        try:
+            upload_video(item)
+        except Exception as e:
+            print("An error happened while uploading. {0}"format(e.message))
+
 
 def download_cmd(options):
-    download_video(options.id, options.dest)
+    try:
+        download_video(options.id, options.dest)
+    except Exception as e:
+        print("An error happened while downloading. {0}".format(e.message))
 
 def list_cmd(options):
     return list_videos()
