@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from .base import *
-DEBUG = True
+DEBUG = False
 
-SITE_ID = 3
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+
+SITE_ID = 4
 
 DATABASES = GetConfig("Databases")
 
