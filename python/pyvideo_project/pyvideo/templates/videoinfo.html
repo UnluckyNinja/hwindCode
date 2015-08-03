@@ -10,16 +10,22 @@
         <div class="row">
           <div class="col-md-1"></div>
         </div>
-        <form role="form" action="/delete_video" id="video_form" method="post">
+
+        <form role="form" action="" id="video_form" method="">
           {% csrf_token %}
         <div class="row">
           <div class="col-md-1">
-            <a id="add_video" href="/add_video" class="btn btn-default">Upload</a>              
+            <button type="submit" class="btn btn-danger disabled" id="video_delete_btn"><i class="glyphicon glyphicon-trash"></i>Delete</button>
           </div>
-          <div class="col-md-1">
-            <button type="submit" class="btn btn-danger disabled" id="video_delete_btn">Delete </button>
+          <div class="col-md-8">
+            
+          </div>
+          <div class="col-md-3 input-append">
+              <input type="text" name="search_input" id="search_input" class="span2 search-query">
+              <button type="submit" class="btn btn-info" id="video_search_btn"><i class="glyphicon glyphicon-search"></i>Search</button>
           </div>
         </div>
+
         <div class="row">
           <div class="col-md-12">
 
@@ -51,6 +57,7 @@
             </table>
           </div>
         </div>
+
         </form>
       </div>
 {% endblock%}
