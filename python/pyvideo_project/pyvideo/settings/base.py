@@ -49,6 +49,7 @@ INSTALLED_APPS = (
     'rest_framework',
     #'pyvideo.apps.videoinfo',
     'pyvideo.apps.videoinfo2',
+    'pyvideo.apps.rent_price',
 )
 
 MIDDLEWARE_CLASSES = (
