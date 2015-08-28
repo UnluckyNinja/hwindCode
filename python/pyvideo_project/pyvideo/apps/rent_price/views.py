@@ -6,7 +6,6 @@ from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-import pdb
 import datetime
 
 class RentPriceList(APIView):
@@ -16,7 +15,6 @@ class RentPriceList(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        pdb.set_trace()
         serializer = RentPriceSerializer(data = request.data, many=True)
         if serializer.is_valid():
             serializer.save()
@@ -24,7 +22,6 @@ class RentPriceList(APIView):
         return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, format=None):
-        pdb.set_trace()
         date_str = request.query_params.get('date', None)
         date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
         if date is not None:
