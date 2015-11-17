@@ -9,6 +9,8 @@ from azure.storage.blob import BlobService
 from azure.common import AzureHttpError
 import pdb
 
+from time import gmtime, strftime
+
 from datetime import datetime
 from btcc_client import btcc_client
 from btcc_client import Market
@@ -61,6 +63,17 @@ class bttc_trade_collector (object):
                 if (ret == None):
                     continue
                 entity = self._process_cur_order_result(ret)
+                if (entity == None):
+                    continue
+
+            elif (self._type == "cur_price_and_order"):
+                price = self._client.get_current_price()
+                if (price == None):
+                    continue
+                order = self._client.get_current_order()
+                if (order == None):
+                    continue
+                entity = self._process_cur_price_and_order_result(price, order)
                 if (entity == None):
                     continue
 
@@ -136,6 +149,51 @@ class bttc_trade_collector (object):
         finally:
             return ret
 
+    def _process_cur_price_and_order_result(self, price, order):
+        #pdb.set_trace()
+        ret = None
+        try:
+            values = []
+            for i in range(0, len(self._schema)):
+                key = self._schema[i]
+                if (key in price["ticker"]):
+                    value = str(price["ticker"][key])
+                    values.append(value)
+                else:
+                    values.append("")
+
+            price_timestamp = price["ticker"]["date"]
+            order_timestamp = order["date"]
+            timestamp = price_timestamp
+            if (abs(order_timestamp - price_timestamp) >= 5):
+                return None
+
+            #pdb.set_trace()
+            order_lists = [("asks", order["asks"]), ("bids", order["bids"])]
+            for order_tuple in order_lists:
+                order_type = order_tuple[0]
+                order_list = order_tuple[1]
+                tmp = []
+                for i in range(0, len(order_list)):
+                    cur_price = order_list[i][0]
+                    amount = order_list[i][1]
+                    tmp.append([str(order_timestamp), order_type, cur_price, amount])
+                if (order_type == "asks"):
+                    tmp = sorted(tmp, key= lambda x: x[2])
+                else:
+                    tmp = sorted(tmp, key= lambda x: x[2], reverse=True)
+                for i in range(0, len(tmp)):
+                    item_value = values.copy()
+                    item_value.append(tmp[i][0])
+                    item_value.append(tmp[i][1])
+                    item_value.append(str(tmp[i][2]))
+                    item_value.append(str(tmp[i][3]))
+                    ret = (timestamp, "\t".join(item_value))
+                    self._writer.write_log(ret)
+        except:
+            return None
+        finally:
+            return ret
 
 class azure_storage_writer (object):
     """storage operation wrapper, desiged for writing logs to storage"""
@@ -178,6 +236,6 @@ class azure_storage_writer (object):
 
     def _get_path(self, timestamp):
         d = datetime.fromtimestamp(timestamp)
-        part = str.format("logs-part-{}.txt", d.minute // 10)
+        part = str.format("logs-part-{}.txt", d.minute // 5)
         path_str = d.strftime('%Y-%m-%d/%H')
         return str.format("{}/{}/{}", self._prefix, path_str, part)
