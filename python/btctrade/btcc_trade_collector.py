@@ -14,6 +14,7 @@ from time import gmtime, strftime
 from datetime import datetime
 from btcc_client import btcc_client
 from btcc_client import Market
+from btcc_log import create_timed_rotating_log
 
 class bttc_trade_collector (object):
     """btcc trade extractor"""
@@ -31,6 +32,7 @@ class bttc_trade_collector (object):
         self._account_key = self._config["account_key"]
         self._container = self._config["container"]
         self._writer = azure_storage_writer(self._account_name, self._account_key, self._container, self._prefix)
+        self._logger = create_timed_rotating_log()
 
 
     def run(self):
@@ -38,6 +40,7 @@ class bttc_trade_collector (object):
             last_id = self._config["start_id"]
 
         while (True):
+            self._logger.info("Start a new round with type:" + self._type)
             if (self._type == "cur_price"):
                 ret = self._client.get_current_price()
                 if (ret == None):
@@ -82,6 +85,7 @@ class bttc_trade_collector (object):
             time.sleep(self._interval)
 
     def _process_trade_history_result(self, result):
+        self._logger.info("Begin process the trade history")
         max_id = None
         try:
             if (len(result) == 0):
@@ -97,7 +101,8 @@ class bttc_trade_collector (object):
                 self._writer.write_log(ret)
                 if (max_id == None or (max_id != None and max_id < int(tid))):
                     max_id = int(tid)
-        except:
+        except Exception as e:
+            self._logger.warn("Hit an Exception " + str(e))
             pass
         finally:
             return max_id
@@ -105,6 +110,7 @@ class bttc_trade_collector (object):
         pass
 
     def _process_cur_order_result(self, result):
+        self._logger.info("Begin process the current order result")
         ret = None
         try:
             values = []
@@ -124,12 +130,14 @@ class bttc_trade_collector (object):
                 values = [str(timestamp), "bids", price, amount]
                 ret = (timestamp, "\t".join(values))
                 self._writer.write_log(ret)
-        except:
+        except Exception as e:
+            self._logger.warn("Hit an Exception " + str(e))
             pass
         finally:
             return ret
 
     def _process_cur_price_result(self, result):
+        self._logger.info("Begin process the current price result")
         ret = None
         try:
             #jobj = json.loads(result)
@@ -144,13 +152,15 @@ class bttc_trade_collector (object):
             timestamp = result["ticker"]["date"]
             ret = (timestamp, '\t'.join(values))
             self._writer.write_log(ret)
-        except :
+        except Exception as e:
+            self._logger.warn("Hit an Exception " + str(e))
             pass
         finally:
             return ret
 
     def _process_cur_price_and_order_result(self, price, order):
         #pdb.set_trace()
+        self._logger.info("Begin process the current price and order result")
         ret = None
         try:
             values = []
@@ -190,7 +200,8 @@ class bttc_trade_collector (object):
                     item_value.append(str(tmp[i][3]))
                     ret = (timestamp, "\t".join(item_value))
                     self._writer.write_log(ret)
-        except:
+        except Exception as e:
+            self._logger.warn("Hit an Exception " + str(e))
             return None
         finally:
             return ret
@@ -205,6 +216,7 @@ class azure_storage_writer (object):
         self._prefix = prefix
         self._container = container
         self._blob.create_container(container)
+        self._logger = create_timed_rotating_log()
 
     def write_log(self, entity):
         path = self._get_path(entity[0])
@@ -224,15 +236,22 @@ class azure_storage_writer (object):
             self._buf.close()
 
     def _dump_buf_to_storage(self):
+        self._logger.info("Begin dump to azure blob")
         loop = 0;
         while True:
             try:
                 self._blob.put_block_blob_from_text(self._container,self._cur_path, self._buf.getvalue())
                 break
             except AzureHttpError as e:
+                self._logger.warn("Hit an AzureHttpError " + str(e))
+                self._logger.warn("Retry times: {0}".format(loop))
                 loop = loop + 1
                 if loop >= 3:
                     raise e
+            except Exception as e:
+                self._logger.warn("Hit an Exception " + str(e))
+                raise e
+        self._logger.info("Dump to azure blob succeeded.")
 
     def _get_path(self, timestamp):
         d = datetime.fromtimestamp(timestamp)

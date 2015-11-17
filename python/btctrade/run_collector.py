@@ -2,6 +2,10 @@ import json
 import sys
 from btcc_trade_collector import bttc_trade_collector
 from btcc_client import Market
+from btcc_log import create_timed_rotating_log
+from btcc_log import set_log_name_prefix
+
+
 
 with open("./collector_config.json") as config_file:
     config = json.load(config_file)
@@ -16,7 +20,12 @@ common = config["common"]
 jobname = sys.argv[1]
 job = config["jobs"][jobname]
 
+set_log_name_prefix(jobname)
+logger = create_timed_rotating_log()
+
 submit_config = common.copy()
 submit_config.update(job)
 a = bttc_trade_collector(submit_config)
+logger.info("btcc collector started with the following config:")
+logger.info(json.dumps(submit_config))
 a.run()

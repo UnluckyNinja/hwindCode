@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 from enum import Enum
+import json
 import time
 import requests
 import urllib.parse
+from btcc_log import create_timed_rotating_log
 
 class Market(Enum):
     All = "all"
@@ -23,20 +25,23 @@ class btcc_client (object):
 
         self._base_url = "https://data.btcchina.com/data/"
         self._market = market
+        self._logger = create_timed_rotating_log()
 
     @property
     def market(self):
         return self._market
 
     def _request_and_return(self, url, payload={}):
+        self._logger.info("Web request. url:{0}, payload:{1}".format(url, json.dumps(payload)))
         payload["market"] = self._market.value
         ret = None
         try:
             result = requests.get(url, params=payload)
             if (result.status_code == 200):
+                self._logger.info("Web request succeeded")
                 ret = result.json()
-        except:
-            pass
+        except Exception as e:
+            self._logger.warn(str(e))
         finally:
             return ret
 
