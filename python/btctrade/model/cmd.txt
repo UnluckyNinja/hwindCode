@@ -1,0 +1,1 @@
+--master spark://headnodehost:7077 --executor-memory 2g --total-executor-cores 4 d:\test.py 
