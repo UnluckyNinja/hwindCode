@@ -1,4 +1,5 @@
-import pdb
+import sys
+import uuid
 
 def getEMA(items, n):
     EMA = items[0]
@@ -75,53 +76,87 @@ def testRun(results, low_bar, high_bar, ratio, save_to_file=False):
                 f.write("\n")
     return final
 
+def _getRunResultsScore(run_result):
+    index = len(run_result) - 1
+    evaluated_value = float(run_result[index][10])
+    operation_cnt = 0
+    for i in range(0, len(run_result)):
+        if (run_result[i][11] != "NA"):
+            operation_cnt = operation_cnt + 1
+    return (evaluated_value, operation_cnt)
 
-items = []
-price = []
-with open("000000_0") as f:
-    for line in f:
-        line = line.strip()
-        cols = line.split('\t')
-        items.append((cols[0], cols[1], cols[2], cols[3], cols[4]))
-        price.append(float(cols[4]))
+def evaluateParam(param, items, save_to_file=False):
+    low = param[0]
+    high = param[1]
+    ratio = param[2]
 
-results = []
-with open("macd.txt", "w+") as f:
+    price = []
+    for i in range(0, len(items)):
+        price.append(float(items[i][4]))
+
+    results = []
     macd = getMACD(price)
     for i in range(0, len(items)):
         item = items[i]
         m = macd[i]
-        if (float(item[4]) != m[0]):
-            pdb.set_trace()
         t = (str(item[0]), str(item[1]), str(item[2]), str(item[3]), str(item[4]), str(m[1]), str(m[2]), str(m[3]), str(m[4]), str(m[5]))
         results.append(t)
-        ret = "\t".join(t)
-        f.write(ret)
-        f.write("\n")
 
-index = len(results) -1
-multi_mode = False
-if (multi_mode == True):
-    low_bar_start = -0.2
-    high_bar_start = 0.2
-    ratio_start = 1.1
-    max_value = 0
-    max_combine = "nothing"
+    if (save_to_file == True):
+        with open("macd.txt", "w+") as f:
+            for t in results:
+                f.write("\t".join(t))
+                f.write("\n")
 
+    index = len(results) - 1
+    run_result = testRun(results, low, high, ratio, save_to_file)
+    score = _getRunResultsScore(run_result)
 
-    for i in range(0, 40):
-        low_bar = low_bar_start + 0.005*i
-        for j in range(0, 40):
-            high_bar = high_bar_start + 0.005*j
-            for k in range(0, 10):
-                ratio = ratio_start + 0.1*k
-                run_result = testRun(results, low_bar, high_bar, 1.2)
-                if (max_value < float(run_result[index][10])):
-                    max_value = float(run_result[index][10])
-                    max_combine = "{0}_{1}_{2}".format(low_bar, high_bar, ratio)
+    evaluated_value = score[0]
+    operation_cnt = score[1]
+    return (evaluated_value, (param[0], param[1], param[2], evaluated_value, operation_cnt))
 
-    print(max_value)
-    print(max_combine)
-else:
-    run_result = testRun(results, -0.18, 0.19, 19.6, True)
-    print(run_result[index][10])
+def _getArray(start, end, step):
+    ret = []
+    for i in range(0, int((end-start)/step)):
+        ret.append(start + i * step)
+    return ret
+
+def start_evaluation(sc, file_path):
+    print("Start evaluation with data file {0}".format(file_path))
+    low = _getArray(-2.4, 0, 0.03)
+    high = _getArray(0.01, 1.6, 0.03)
+    ratio = _getArray(1.0, 20.0, 0.3)
+
+    tasks = []
+    for i in range(0, len(low)):
+        for j in range(0, len(high)):
+            for k in range(0, len(ratio)):
+                t = (low[i], high[j], ratio[k])
+                tasks.append(t)
+
+    src = sc.textFile(file_path)
+    items = src.map(lambda x: x.split("\t")).collect()
+
+    print(len(tasks))
+
+    params = sc.parallelize(tasks)
+
+    results = params.map(lambda x: evaluateParam(x, items)).repartition(1).sortByKey()
+
+    path = "wasb://btcc@guohaodata.blob.core.windows.net/evaluateresults/" + str(uuid.uuid4())
+    print("results will be saved under {0}".format(path))
+    results.saveAsTextFile(path)
+
+if (__name__ == "__main__"):
+    if (len(sys.argv) != 2):
+        print("Usage: evaluate_model.py [data_file_guid]")
+        sys.exit(0)
+    file_guid = sys.argv[1]
+    file_path = "wasb://btcc@guohaodata.blob.core.windows.net/cooked/{0}/*".format(file_guid)
+
+    from pyspark import SparkContext, SparkConf
+    conf = SparkConf()
+    conf.setAppName("test")
+    sc = SparkContext(conf = conf)
+    start_evaluation(sc, file_path)
