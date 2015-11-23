@@ -144,9 +144,9 @@ def start_evaluation(sc, file_path):
 
     results = params.map(lambda x: evaluateParam(x, items)).repartition(1).sortByKey()
 
-    path = "wasb://btcc@guohaodata.blob.core.windows.net/evaluateresults/" + str(uuid.uuid4())
-    print("results will be saved under {0}".format(path))
-    results.saveAsTextFile(path)
+    result_path = "wasb://btcc@guohaodata.blob.core.windows.net/evaluateresults/" + str(uuid.uuid4())
+    print("results will be saved under {0}".format(result_path))
+    results.saveAsTextFile(result_path)
 
 if (__name__ == "__main__"):
     if (len(sys.argv) != 2):

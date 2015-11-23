@@ -1,1 +1,7 @@
---master spark://headnodehost:7077 --executor-memory 2g --total-executor-cores 4 d:\test.py 
+--master spark://headnodehost:7077 --executor-memory 2g --total-executor-cores 4 test.py 
+
+
+sudo spark-submit --master yarn-client --executor-memory 3g --num-executors 60 evaluate_model.py e4677ceb-5c3e-4fbe-b208-f8b9f6aae38e
+
+
+sudo spark-submit --master yarn-client --executor-memory 2g --num-executors 4 pre-process.py huobi 2015-11-23/06
