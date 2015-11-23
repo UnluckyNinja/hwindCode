@@ -46,7 +46,7 @@ def testRun(results, low_bar, high_bar, ratio, save_to_file=False):
 
         if (need_buy == True):
             if ((is_up == True) and (pre_dif < low_bar and cur_dif > low_bar)):
-                cur_stock = cur_money / float(results[i][3])
+                cur_stock = cur_money / float(results[i][4])
                 cur_money = 0.0
                 need_buy = False
                 operation = "BUY"
@@ -54,13 +54,13 @@ def testRun(results, low_bar, high_bar, ratio, save_to_file=False):
                 pass
         else:
             if (cur_dif > high_bar or cur_dif < ratio * low_bar):
-                cur_money = cur_stock * float(results[i][2])
+                cur_money = cur_stock * float(results[i][4])
                 cur_stock = 0.0
                 need_buy = True
                 operation = "SELL"
             else:
                 pass
-        cur_value = cur_money + cur_stock * float(results[i][2])
+        cur_value = cur_money + cur_stock * float(results[i][4])
         changes.append(cur_value)
         t = (results[i][0], results[i][1], results[i][2], results[i][3], results[i][4], results[i][5], results[i][6], results[i][7], results[i][8], results[i][9], str(cur_value), operation)
         final.append(t)
@@ -123,5 +123,5 @@ if (multi_mode == True):
     print(max_value)
     print(max_combine)
 else:
-    run_result = testRun(results, -0.2, 0.3, 9.0, True)
+    run_result = testRun(results, -0.18, 0.19, 19.6, True)
     print(run_result[index][10])

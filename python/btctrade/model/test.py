@@ -51,7 +51,7 @@ def testRun(results, low_bar, high_bar, ratio, save_to_file=False):
 
         if (need_buy == True):
             if ((is_up == True) and (pre_dif < low_bar and cur_dif > low_bar)):
-                cur_stock = cur_money / float(results[i][3])
+                cur_stock = cur_money / float(results[i][4])
                 cur_money = 0.0
                 need_buy = False
                 operation = "BUY"
@@ -59,13 +59,13 @@ def testRun(results, low_bar, high_bar, ratio, save_to_file=False):
                 pass
         else:
             if (cur_dif > high_bar or cur_dif < ratio * low_bar):
-                cur_money = cur_stock * float(results[i][2])
+                cur_money = cur_stock * float(results[i][4])
                 cur_stock = 0.0
                 need_buy = True
                 operation = "SELL"
             else:
                 pass
-        cur_value = cur_money + cur_stock * float(results[i][2])
+        cur_value = cur_money + cur_stock * float(results[i][4])
         changes.append(cur_value)
         t = (results[i][0], results[i][1], results[i][2], results[i][3], results[i][4], results[i][5], results[i][6], results[i][7], results[i][8], results[i][9], str(cur_value), operation)
         final.append(t)
@@ -120,9 +120,9 @@ def getArray(start, end, step):
         ret.append(start + i * step)
     return ret
 
-low = getArray(-10.0, 0, 0.5)
-high = getArray(0.1, 10.0, 0.5)
-ratio = getArray(1.0, 20.0, 1.0)
+low = getArray(-2.4, 0, 0.03)
+high = getArray(0.01, 1.6, 0.03)
+ratio = getArray(1.0, 20.0, 0.3)
 
 tasks = []
 for i in range(0, len(low)):
