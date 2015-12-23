@@ -50,6 +50,7 @@ INSTALLED_APPS = (
     #'pyvideo.apps.videoinfo',
     'pyvideo.apps.videoinfo2',
     'pyvideo.apps.rent_price',
+    'pyvideo.apps.btc',
 )
 
 MIDDLEWARE_CLASSES = (
