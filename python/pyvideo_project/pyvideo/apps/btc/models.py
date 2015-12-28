@@ -14,6 +14,11 @@ class BTCTrade(models.Model):
         unique = True
         )
 
+    src = models.CharField(
+        max_length=20,
+        default='aliyun_1'
+        )
+
     btcc_btc_free = models.FloatField(
         verbose_name = "btcc_btc_free"
         )
